@@ -12,7 +12,7 @@
     "IIS Express": {
       "commandName": "IISExpress",
       "launchBrowser": true,
-      "launchUrl": "chorechart",
+      "launchUrl": "api/chorechart",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }

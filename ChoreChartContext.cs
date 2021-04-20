@@ -13,9 +13,9 @@ namespace ChoreChartAPI
 
         }
 
-        public DbSet<Chore> CatalogItems { get; set; }
+        public DbSet<Chore> Chores { get; set; }
 
-        public DbSet<Day> CatalogBrands { get; set; }
+        public DbSet<Day> Days { get; set; }
 
     }
 }

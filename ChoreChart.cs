@@ -12,12 +12,18 @@ namespace ChoreChartAPI
         public string Instructions { get; set; }
 
         public int Value { get; set; }
-
-        public IEnumerable<Day> Days { get; set; }
     }
     public class Day
     {
+        public int Id { get; set; }
+        public int ChoreId { get; set; }
         public string Name { get; set; }
         public string Status { get; set; }
+    }
+    public class User
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public int AmountSaved { get; set; }
     }
 }

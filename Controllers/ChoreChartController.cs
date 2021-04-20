@@ -8,78 +8,94 @@ using Microsoft.Extensions.Logging;
 namespace ChoreChartAPI.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class ChoreChartController : ControllerBase
     {
-        private static readonly string[] Days = new[]
+        private static readonly string[] _days = new[]
         {
             "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
         };
 
         private readonly ILogger<ChoreChartController> _logger;
 
-        private static Random random = new Random();
+        private readonly ChoreChartContext _context;
 
-        public ChoreChartController(ILogger<ChoreChartController> logger)
+        public ChoreChartController(ChoreChartContext context)
         {
-            _logger = logger;
+            _context = context;
         }
 
+        // GET: /ChoreChart
         [HttpGet]
-        public IEnumerable<Chore> GetAllChores()
+        public  ActionResult<IEnumerable<Chore>> GetAllChores(int id)
         {
-            var random = new Random();
-            return new List<Chore>
+            var chores = _context.Chores;
+
+            return chores;
+        }
+
+        // GET: /ChoreChart/:id
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Chore>> GetChore(int id)
+        {
+            var chore = await _context.Chores.FindAsync(id);
+
+            if (chore == null)
             {
-                new Chore
-                {
-                    Id = random.Next(999999),
-                    Name = "",
-                    Instructions = "",
-                    Value = random.Next(5),
-                    Days = Days.Select(day => new Day
-                    {
-                        Name = day,
-                        Status = "unchecked"
-                    }).ToArray()
-                }
+                return NotFound();
             }
-            .ToArray();
+
+            return chore;
         }
 
-        [HttpGet]
-        public Chore GetChore()
-        {
-            return new Chore
-            {
-                Id = random.Next(999999),
-                Name = "",
-                Instructions = "",
-                Value = random.Next(5),
-                Days = Days.Select(day => new Day
-                {
-                    Name = day,
-                    Status = "unchecked"
-                }).ToArray()
-            };
-        }
-
+        // POST: /ChoreChart
         [HttpPost]
-        public void SaveChore(Chore chore)
+        public async Task<ActionResult<Chore>> CreateChore(Chore chore)
         {
-            //save chore
+            _context.Chores.Add(chore);
+            _context.Days.AddRange(_days.Select(day => new Day() { 
+                Name = day,
+                ChoreId = chore.Id,
+                Status = "unchecked"
+            }));
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction(nameof(GetChore), new { id = chore.Id }, chore);
         }
 
-        [HttpDelete]
-        public void DeleteChore(int id)
+        // PUT: /ChoreChart
+        [HttpPut]
+        public async Task<ActionResult<Chore>> UpdateChore(Chore chore)
         {
-            //delete chore
+            _context.Chores.Update(chore);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction(nameof(GetChore), new { id = chore.Id }, chore);
         }
 
-        [HttpDelete]
-        public void UpdateTotal(int amount)
+        // DELETE: /ChoreChart/:id
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteChore(int id)
         {
-            //update total
+            var chore = await _context.Chores.FindAsync(id);
+            if (chore == null)
+            {
+                return NotFound();
+            }
+
+            _context.Chores.Remove(chore);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        // GET: /ChoreChart
+        [HttpGet("days/{choreId}")]
+        public ActionResult<IEnumerable<Day>> GetDays(int choreId)
+        {
+            var days = _context.Days.Where(d => d.ChoreId == choreId).ToArray();
+
+            return days;
         }
     }
 }
